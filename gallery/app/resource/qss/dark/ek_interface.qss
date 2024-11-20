@@ -1,0 +1,17 @@
+EKInterface,
+#EKview {
+    background-color: transparent;
+}
+
+QScrollArea {
+    border: none;
+    background-color: transparent;
+}
+
+
+EKBannerWidget > #EKgalleryLabel {
+    font: 42px 'Segoe UI SemiBold', 'Microsoft YaHei SemiBold';
+    background-color: transparent;
+    color: white;
+    padding-left: 28px;
+}

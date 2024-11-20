@@ -1,0 +1,42 @@
+<RCC>
+    <qresource prefix="/gallery">
+        <file>images/header1.png</file>
+        <file>images/logo_ek3_black.png</file>
+        <file>images/ble.png</file>
+        <file>images/connect.png</file>
+        <file>images/deepSavePower.png</file>
+        <file>images/feedback.png</file>
+        <file>images/finger.png</file>
+        <file>images/hardware.png</file>
+        <file>images/LED.png</file>
+        <file>images/location.png</file>
+        <file>images/password.png</file>
+        <file>images/power.png</file>
+        <file>images/powerSleep.png</file>
+        <file>images/rotate.png</file>
+        <file>images/connect2.png</file>
+        <file>images/update.png</file>
+        <file>images/user.png</file>
+        <file>images/userManual.png</file>
+        <file>images/wifi.png</file>
+        <file>images/x.png</file>
+        <file>images/xInput.png</file>
+        <file>images/wifi_ssid.png</file>
+        <file>images/wifi_password.png</file>
+
+        <file>qss/dark/ek_interface.qss</file>
+        <file>qss/dark/setting_interface.qss</file>
+        <file>qss/dark/link_card.qss</file>
+        <file>qss/dark/navigation_view_interface.qss</file>
+
+
+        <file>qss/light/ek_interface.qss</file>
+        <file>qss/light/setting_interface.qss</file>
+        <file>qss/light/link_card.qss</file>
+        <file>qss/light/navigation_view_interface.qss</file>
+
+        <file>i18n/gallery.zh_CN.qm</file>
+        <file>i18n/gallery.zh_HK.qm</file>
+
+    </qresource>
+</RCC>
