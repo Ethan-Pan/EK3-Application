@@ -1,2 +1,2 @@
-# EK3-Application
+# EK-Home
 Windows application software for EK3
