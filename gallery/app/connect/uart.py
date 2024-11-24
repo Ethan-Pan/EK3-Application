@@ -3,6 +3,7 @@ import serial.tools.list_ports
 import time
 from PySide6.QtCore import QThread, Signal
 import os
+from . import weather
 
 class FingerEnrollThread(QThread):
     finished = Signal(int)  # 信号用于通知录入结果：1成功，0失败，-1异常
@@ -55,6 +56,7 @@ class UartConnect:
         self.connected = False
         self.connect_flag = 0
         self.enroll_thread = None
+        self.weather = None
         # self.connect_port('COM3')
         
     def scan_ports(self):
@@ -201,7 +203,7 @@ class UartConnect:
             self.ser.reset_input_buffer()
             self.ser.reset_output_buffer()
             self.ser.write(command.encode())
-            time.sleep(0.5)  # 等待响应
+            time.sleep(1)  # 等待响应
             
             if self.ser.in_waiting:
                 response = self.ser.read(self.ser.in_waiting).decode()
@@ -215,9 +217,28 @@ class UartConnect:
         except:
             self.connect_flag = 0
             return -1
+    
+    def get_ble_address(self, command):
+        try:
+            time.sleep(0.1)
+            # 在发送前先清空缓冲区
+            self.ser.reset_input_buffer()
+            self.ser.reset_output_buffer()
+            self.ser.write(command.encode())
+            time.sleep(3)  # 等待响应
+            
+            if self.ser.in_waiting:
+                response = self.ser.read(self.ser.in_waiting).decode()
+                if 'BLE Address' in response:
+                    return response
+                else:
+                    return 0
+        except:
+            self.connect_flag = 0
+            return -1
 
     # update the config
-    def updateConfig(self, config_data):
+    def updateConfig(self, config_data, connect_flag):
         flag = 0
         # user name
         comand = '#040' + config_data['user_name'] + '$'
@@ -225,7 +246,11 @@ class UartConnect:
         print(f'user name:{comand}')
         # area city
         area_city = ['深圳', '东莞', '广州', '惠州', '中山']
-        comand = '#041' + str(area_city.index(config_data['area_city'])) + '$'
+        area_city_en = ['Shen Zhen', 'Dong Guan', 'Guang Zhou', 'Hui Zhou', 'Zhong Shan']
+        area_city_en_list = ['shenzhen', 'dongguan', 'guangzhou', 'huizhou', 'zhongshan']
+        index = area_city.index(config_data['area_city'])
+        self.weather = weather.WeatherAPI(area_city_en_list[index])
+        comand = '#041' + area_city_en[index] + '$'
         flag += self.send_command(comand)
         print(f'area city:{comand}')
         # power show
@@ -273,23 +298,74 @@ class UartConnect:
         flag += self.send_command(comand)
         print(f'connect flag:{comand}')
         # wifi ssid
-        comand = '#04d' + config_data['wifi_ssid'] + '$'
-        flag += self.send_command(comand)
-        print(f'wifi ssid:{comand}')
+        # comand = '#04d' + config_data['wifi_ssid'] + '$'
+        # flag += self.send_command(comand)
+        # print(f'wifi ssid:{comand}')
         # wifi password
-        comand = '#04e' + config_data['wifi_ps'] + '$'
-        flag += self.send_command(comand)
-        print(f'wifi password:{comand}')
-        print(f'flag:{flag}')
-        if flag >= 15:
+        # comand = '#04e' + config_data['wifi_ps'] + '$'
+        # flag += self.send_command(comand)
+        # print(f'wifi password:{comand}')
+        # print(f'flag:{flag}')
+
+        # ble connect
+        if connect_flag == '2':
+            command = '#070$'
+            response = self.get_ble_address(command)
+            if 'BLE Address' in response:
+                address = response.split('BLE Address:')[1].strip()
+                print(f'ble address:{address}')
+                self.add_ble_address(address)
+
+        if flag >= 13:
             # 发送重启命令
             command = '#060$'
             self.send_command(command)
             return 1
         else:
             return 0
+    
+    
+
+    def wire_update_weather(self):
+         # wire connect
+        try:
+            weather_data = self.weather.get_weather_data()
+            comand = '#080' + weather_data + '$'
+            print(f'weather command:{comand}')
+            self.ser.write(comand.encode())
+            time.sleep(1)
+            if self.ser.in_waiting:
+                response = self.ser.read(self.ser.in_waiting).decode()
+                print(f'weather response:{response}')
+                if '$001#' in response:
+                    self.connected = True
+                    self.connect_flag = 0
+                    return 1
+                if '$000#' in response:
+                    self.connect_flag = 0
+                    return 0
+        except:
+            self.connect_flag = 0
+            return -1
+
+    def add_ble_address(self, address):
+        config_path = 'gallery/app/view/ek3.config'
+        if not os.path.exists(config_path):
+            return 0
+        config_dict = {}
+        with open(config_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                if '=' in line:
+                    key, value = line.strip().split('=')
+                    config_dict[key] = value
+                    
+        config_dict['ble_address'] = address
         
+        # 写回文件
+        with open(config_path, 'w', encoding='utf-8') as f:
+            for key, value in config_dict.items():
+                f.write(f"{key}={value}\n")
+
 if __name__ == '__main__':
     test = UartConnect()
-    test.connect_port('COM3')
-    
+    test.add_ble_address('AC:15:18:C0:D9:7A')

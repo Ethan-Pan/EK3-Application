@@ -2,13 +2,14 @@ from PySide6.QtCore import Qt
 from qfluentwidgets import (GroupHeaderCardWidget, TogglePushButton,InfoBar,InfoBarPosition)
 from PySide6.QtCore import QTimer
 from ..connect.uart import UartConnect
+import os
 
 class FirstConnectCard(GroupHeaderCardWidget):
     def __init__(self, uart: UartConnect, parent=None):
         super().__init__(parent)
         self.setTitle("连接设备")
         self.setBorderRadius(15)
-
+        self.wire_flag = 0
         self.uartConnect = uart
 
         self.button = TogglePushButton('连接')
@@ -58,6 +59,13 @@ class FirstConnectCard(GroupHeaderCardWidget):
             self.timer2.timeout.connect(self.check_connect)
             # 设置延时时间为1000毫秒（1秒）
             self.timer2.start(1000)
+            
+            # self.check_wire_connect()
+            # if self.wire_flag == 1:
+            #     self.uartConnect.wire_update_weather()
+            #     self.weather_timer = QTimer()
+            #     self.weather_timer.timeout.connect(lambda: self.uartConnect.wire_update_weather())
+            #     self.weather_timer.start(60000)  # 60000毫秒 = 1分钟
         else:
             InfoBar.error(
             title='连接失败',
@@ -88,3 +96,13 @@ class FirstConnectCard(GroupHeaderCardWidget):
             self.button.setText('连接')
             self.button.setEnabled(True)
             self.timer2.stop()
+            self.wire_flag = 0
+    
+    def check_wire_connect(self):
+        config_path = 'gallery/app/view/ek3.config'
+        if not os.path.exists(config_path):
+            return
+        with open(config_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                if 'connect' in line:
+                    self.wire_flag = int(line.split('=')[1].strip())

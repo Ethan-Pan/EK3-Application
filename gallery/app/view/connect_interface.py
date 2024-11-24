@@ -24,14 +24,15 @@ class PivotInterface(QWidget):
         self.bleSwitchButton = SwitchButton('Off')
         self.wireSwitchButton = SwitchButton('Off')
 
-        self.wifiInterface(self.wifiWidget)
+        # self.wifiInterface(self.wifiWidget)
         self.bleInterface(self.bleWidget)
         self.wireInterface(self.wireWidget)
 
         # add items to pivot
-        self.addSubInterface(self.wifiWidget, 'wifiWidget', 'WIFI连接')
-        self.addSubInterface(self.bleWidget, 'bleWidget', '蓝牙连接')
+        # self.addSubInterface(self.wifiWidget, 'wifiWidget', 'WIFI连接')
         self.addSubInterface(self.wireWidget, 'wireWidget', '有线连接')
+        self.addSubInterface(self.bleWidget, 'bleWidget', '蓝牙连接')
+        
 
         self.vBoxLayout.addWidget(self.pivot, 0, Qt.AlignLeft)
         self.vBoxLayout.addWidget(self.stackedWidget)
@@ -39,10 +40,10 @@ class PivotInterface(QWidget):
         StyleSheet.NAVIGATION_VIEW_INTERFACE.apply(self)
 
         self.stackedWidget.currentChanged.connect(self.onCurrentIndexChanged)
-        self.stackedWidget.setCurrentWidget(self.wifiWidget)
-        self.pivot.setCurrentItem(self.wifiWidget.objectName())
+        # self.stackedWidget.setCurrentWidget(self.wifiWidget)
+        self.pivot.setCurrentItem(self.wireWidget.objectName())
 
-        qrouter.setDefaultRouteKey(self.stackedWidget, self.wifiWidget.objectName())
+        qrouter.setDefaultRouteKey(self.stackedWidget, self.wireWidget.objectName())
 
     def wifiInterface(self, widget: QWidget):
         hBoxLayout = QHBoxLayout(widget)
@@ -76,7 +77,7 @@ class PivotInterface(QWidget):
         hBoxLayout = QHBoxLayout(widget)
         iconWidget = IconWidget(':/gallery/images/ble.png')
         titleLabel = BodyLabel('EK3通过蓝牙更新网络数据')
-        contentLabel = CaptionLabel('请保持本程序在后台常驻，以维持与EK3的通信')
+        contentLabel = CaptionLabel('请保持本程序在后台常驻，该模式下EK3在电脑锁屏时无法正常使用')
         textLayout = QVBoxLayout()
         subLayout = QHBoxLayout()
         iconWidget.setFixedSize(20, 20)
@@ -103,7 +104,7 @@ class PivotInterface(QWidget):
     def wireInterface(self, widget: QWidget):
         hBoxLayout = QHBoxLayout(widget)
         iconWidget = IconWidget(':/gallery/images/connect2.png')
-        titleLabel = BodyLabel('EK3通过有线方式更新网络数据')
+        titleLabel = BodyLabel('EK3通过有线方式更新网络数据（推荐）')
         contentLabel = CaptionLabel('请保持本程序在后台常驻以及type-c连接')
         textLayout = QVBoxLayout()
         subLayout = QHBoxLayout()

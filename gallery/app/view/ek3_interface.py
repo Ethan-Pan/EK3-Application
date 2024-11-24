@@ -1,5 +1,6 @@
 # coding:utf-8
 import os
+import asyncio
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QWidget, QVBoxLayout
 from qfluentwidgets import (PrimaryPushButton,ScrollArea, PrimaryPushButton,TransparentToolButton,InfoBar,InfoBarPosition)
@@ -20,6 +21,7 @@ from .encorder_interface import EncoderCard
 from .finger_interface import FingerCard, AddFingerCard
 from .wifi_interface import WifiInterface
 from ..connect.uart import UartConnect
+from ..connect.ble import BLEDeviceManager
 
 
 class EKInterface(ScrollArea):
@@ -43,12 +45,16 @@ class EKInterface(ScrollArea):
         self.powerSaveCard = PowerSaveCard()
         self.fingerCard = FingerCard()
         self.encoderCard = EncoderCard()
+        self.ble = None
         self.addFingerCard = AddFingerCard(self.uart)
-        self.wifiCard = WifiInterface()
+        # self.wifiCard = WifiInterface()
         self.upDataButton = PrimaryPushButton(FIF.UPDATE, '一键同步配置')
         self.upDataButton.clicked.connect(self.on_update_clicked)
 
-        self.conectCard.nav.wifiSwitchButton.checkedChanged.connect(self.showWifiInput)
+        self.ble_run_flag = 0
+        self.wire_run_flag = 0
+
+        # self.conectCard.nav.wifiSwitchButton.checkedChanged.connect(self.showWifiInput)
         self.conectCard.nav.bleSwitchButton.checkedChanged.connect(self.bleSwitchState)
         self.conectCard.nav.wireSwitchButton.checkedChanged.connect(self.wireSwitchState)
 
@@ -98,10 +104,10 @@ class EKInterface(ScrollArea):
 
     def showWifiInput(self, isChecked):
         if isChecked:
-            self.config_connect_flag = '1'
+            self.config_connect_flag = '3'
             self.conectCard.nav.wifiSwitchButton.setText('On')
-            self.wifiCard.setVisible(True)
-            self.vBoxLayout.insertWidget(self.vBoxLayout.count()-1, self.wifiCard, alignment=Qt.AlignTop)
+            # self.wifiCard.setVisible(True)
+            # self.vBoxLayout.insertWidget(self.vBoxLayout.count()-1, self.wifiCard, alignment=Qt.AlignTop)
             self.conectCard.nav.wireSwitchButton.setChecked(False)
             self.conectCard.nav.bleSwitchButton.setChecked(False)
             self.conectCard.nav.wireSwitchButton.setText('Off')
@@ -109,8 +115,8 @@ class EKInterface(ScrollArea):
 
         else:
             self.conectCard.nav.wifiSwitchButton.setText('Off')
-            self.wifiCard.setVisible(False)
-            self.vBoxLayout.removeWidget(self.wifiCard)
+            # self.wifiCard.setVisible(False)
+            # self.vBoxLayout.removeWidget(self.wifiCard)
     
 
     def bleSwitchState(self, isChecked):
@@ -118,28 +124,28 @@ class EKInterface(ScrollArea):
             self.config_connect_flag = '2'
             self.conectCard.nav.bleSwitchButton.setText('On')
             self.conectCard.nav.wireSwitchButton.setText('Off')
-            self.conectCard.nav.wifiSwitchButton.setText('Off')
+            # self.conectCard.nav.wifiSwitchButton.setText('Off')
             self.conectCard.nav.wireSwitchButton.setChecked(False)
-            self.conectCard.nav.wifiSwitchButton.setChecked(False)
+            # self.conectCard.nav.wifiSwitchButton.setChecked(False)
             self.updateCard.switchButton.setText('Off')
             self.updateCard.switchButton.setChecked(False)
-            self.wifiCard.setVisible(False)
-            self.vBoxLayout.removeWidget(self.wifiCard)
+            # self.wifiCard.setVisible(False)
+            # self.vBoxLayout.removeWidget(self.wifiCard)
         else:
             self.conectCard.nav.bleSwitchButton.setText('Off')
     
     def wireSwitchState(self, isChecked):
         if isChecked:
-            self.config_connect_flag = '3'
+            self.config_connect_flag = '1'
             self.conectCard.nav.wireSwitchButton.setText('On')
             self.conectCard.nav.bleSwitchButton.setText('Off')
-            self.conectCard.nav.wifiSwitchButton.setText('Off')
+            # self.conectCard.nav.wifiSwitchButton.setText('Off')
             self.conectCard.nav.bleSwitchButton.setChecked(False)
-            self.conectCard.nav.wifiSwitchButton.setChecked(False)
+            # self.conectCard.nav.wifiSwitchButton.setChecked(False)
             self.updateCard.switchButton.setText('Off')
             self.updateCard.switchButton.setChecked(False)
-            self.wifiCard.setVisible(False)
-            self.vBoxLayout.removeWidget(self.wifiCard)
+            # self.wifiCard.setVisible(False)
+            # self.vBoxLayout.removeWidget(self.wifiCard)
         else:
             self.conectCard.nav.wireSwitchButton.setText('Off')
 
@@ -154,7 +160,7 @@ class EKInterface(ScrollArea):
         # 保存 InfoBar 的引用
         self.updating_info = InfoBar.info(
             title='正在同步中',
-            content="请保持连接等待配置同步完成",
+            content="大约15s，请保持连接",
             orient=Qt.Horizontal,
             isClosable=False,  # 禁用手动关闭
             position=InfoBarPosition.BOTTOM,
@@ -212,18 +218,18 @@ class EKInterface(ScrollArea):
                 parent=self
             )
             return 0
-        # 检查wifi连接模式打卡并且wifi ssid和wifi密码为空
-        if self.config_connect_flag == '1' and (self.wifiCard.config_wifi_ssid == '' or self.wifiCard.config_wifi_password == ''):
-            InfoBar.warning(
-                title='配置错误',
-                content="WIFI连接模式开启时，请输入WIFI ssid和WIFI密码",
-                orient=Qt.Horizontal,
-                isClosable=True,
-                position=InfoBarPosition.BOTTOM,
-                duration=6000,
-                parent=self
-            )
-            return 0
+        # # 检查wifi连接模式打卡并且wifi ssid和wifi密码为空
+        # if self.config_connect_flag == '1' and (self.wifiCard.config_wifi_ssid == '' or self.wifiCard.config_wifi_password == ''):
+        #     InfoBar.warning(
+        #         title='配置错误',
+        #         content="WIFI连接模式开启时，请输入WIFI ssid和WIFI密码",
+        #         orient=Qt.Horizontal,
+        #         isClosable=True,
+        #         position=InfoBarPosition.BOTTOM,
+        #         duration=6000,
+        #         parent=self
+        #     )
+        #     return 0
         # 检测三种连接模式是否开启
         if self.config_connect_flag == '0':
             InfoBar.warning(
@@ -262,8 +268,8 @@ class EKInterface(ScrollArea):
         self.config_info['update'] = self.updateCard.config_update_flag
         # connect way
         self.config_info['connect'] = self.config_connect_flag
-        self.config_info['wifi_ssid'] = self.wifiCard.config_wifi_ssid
-        self.config_info['wifi_ps'] = self.wifiCard.config_wifi_password
+        # self.config_info['wifi_ssid'] = self.wifiCard.config_wifi_ssid
+        # self.config_info['wifi_ps'] = self.wifiCard.config_wifi_password
         # finger buffer
         self.config_info['finger_id'] = list(self.addFingerCard.fingerBuffer.keys())
         self.config_info['finger_name'] = list(self.addFingerCard.fingerBuffer.values())
@@ -271,7 +277,7 @@ class EKInterface(ScrollArea):
         self.config_check()
 
         self.updateConfigInfo()
-        flag = self.uart.updateConfig(self.config_info)
+        flag = self.uart.updateConfig(self.config_info, self.config_connect_flag)
         
         # 关闭更新中的提示
         if hasattr(self, 'updating_info'):
@@ -297,6 +303,41 @@ class EKInterface(ScrollArea):
                 duration=6000,
                 parent=self
             )
+
+        # 使用 QTimer 延迟执行配置更新
+        if self.wire_run_flag == 0 and self.config_connect_flag == '1':
+            QTimer.singleShot(5000, self.uart.try_connect)
+            QTimer.singleShot(7000, self.uart.wire_update_weather)
+            self.weather_timer = QTimer()
+            self.weather_timer.timeout.connect(lambda: self.uart.wire_update_weather())
+            self.weather_timer.start(60000)  # 60000毫秒 = 1分钟
+        if self.ble_run_flag == 0 and self.config_connect_flag == '2':
+            self.ble = BLEDeviceManager()
+            QTimer.singleShot(5000, self._run_ble)
+    
+    def _run_ble(self):
+        # 启动蓝牙后台任务
+        self.ble.start_background_task()
+        # 连接信号到槽
+        self.ble.thread.message_received.connect(self.handle_message)
+        self.ble.thread.connection_status.connect(self.handle_connection_status)
+        
+
+    def handle_message(self, message):
+        # 处理收到的消息
+        print(f"Received message: {message}")
+        # 更新GUI显示等
+
+    def handle_connection_status(self, is_connected):
+        # 处理连接状态变化
+        print(f"Connection status: {'Connected' if is_connected else 'Disconnected'}")
+        # 更新GUI显示等
+
+    def closeEvent(self, event):
+        # 程序关闭时停止蓝牙线程
+        self.ble.stop_background_task()
+        event.accept()
+    
     
     # 同步配置到本地文件
     def updateConfigInfo(self):
@@ -399,32 +440,34 @@ class EKInterface(ScrollArea):
             self.updateCard.switchButton.setText('Off')
         # connect way
         self.config_connect_flag = self.config_info['connect']
-        if self.config_connect_flag == '1':
-            self.conectCard.nav.wifiSwitchButton.setChecked(True)
-            self.conectCard.nav.wifiSwitchButton.setText('On')
-            self.wifiCard.setVisible(True)
-            self.vBoxLayout.insertWidget(self.vBoxLayout.count()-2, self.wifiCard, alignment=Qt.AlignTop)
+        if self.config_connect_flag == '3':
+            pass
+            # self.conectCard.nav.wifiSwitchButton.setChecked(True)
+            # self.conectCard.nav.wifiSwitchButton.setText('On')
+            # self.wifiCard.setVisible(True)
+            # self.vBoxLayout.insertWidget(self.vBoxLayout.count()-2, self.wifiCard, alignment=Qt.AlignTop)
         else:
-            self.wifiCard.setVisible(False)
-            self.vBoxLayout.removeWidget(self.wifiCard)
-            self.conectCard.nav.wifiSwitchButton.setChecked(False)
-            self.conectCard.nav.wifiSwitchButton.setText('Off')
+            pass
+            # self.wifiCard.setVisible(False)
+            # self.vBoxLayout.removeWidget(self.wifiCard)
+            # self.conectCard.nav.wifiSwitchButton.setChecked(False)
+            # self.conectCard.nav.wifiSwitchButton.setText('Off')
         if self.config_connect_flag == '2':
             self.conectCard.nav.bleSwitchButton.setChecked(True)
             self.conectCard.nav.bleSwitchButton.setText('On')
         else:
             self.conectCard.nav.bleSwitchButton.setChecked(False)
             self.conectCard.nav.bleSwitchButton.setText('Off')
-        if self.config_connect_flag == '3':
+        if self.config_connect_flag == '1':
             self.conectCard.nav.wireSwitchButton.setChecked(True)
             self.conectCard.nav.wireSwitchButton.setText('On')
         else:
             self.conectCard.nav.wireSwitchButton.setChecked(False)
             self.conectCard.nav.wireSwitchButton.setText('Off')
-        self.wifiCard.config_wifi_ssid = self.config_info['wifi_ssid']
-        self.wifiCard.config_wifi_password = self.config_info['wifi_ps']
-        self.wifiCard.lineEdit.setText(self.config_info['wifi_ssid'])
-        self.wifiCard.pdLineEdit.setText(self.config_info['wifi_ps'])
+        # self.wifiCard.config_wifi_ssid = self.config_info['wifi_ssid']
+        # self.wifiCard.config_wifi_password = self.config_info['wifi_ps']
+        # self.wifiCard.lineEdit.setText(self.config_info['wifi_ssid'])
+        # self.wifiCard.pdLineEdit.setText(self.config_info['wifi_ps'])
         # finger buffer
         if len(self.config_info['finger_id']) > 2:
             keyList = self.config_info['finger_id'][1:-1].split(', ')
@@ -440,4 +483,11 @@ class EKInterface(ScrollArea):
                 layout = self.addFingerCard.getFingerCard(name, curNum)
                 self.addFingerCard.fingerLayouts[curNum] = layout
                 self.addFingerCard.groupLayout.addLayout(self.addFingerCard.fingerLayouts[curNum])
+    
+        # 如果已经配置好，直接开启蓝牙后台任务
+        if self.config_connect_flag == '2':
+            self.ble_run_flag = 1
+            self.ble = BLEDeviceManager()
+            self._run_ble()
+
         
