@@ -10,7 +10,7 @@ class UpdateCard(GroupHeaderCardWidget):
         self.switchButton = SwitchButton(self.tr('Off'))
         self.switchButton.checkedChanged.connect(self.onSwitchCheckedChanged)
 
-        self.addGroup(':/gallery/images/update.png', "自动更新检测", "EK3更新需要在wifi连接模型下运行", self.switchButton)
+        self.addGroup(':/gallery/images/update.png', "自动更新检测", "EK3在连接状态下会自动检测更新", self.switchButton)
 
     def onSwitchCheckedChanged(self, isChecked):
         if isChecked:

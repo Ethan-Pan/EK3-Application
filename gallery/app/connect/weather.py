@@ -87,6 +87,7 @@ class WeatherAPI:
         self.get_weather_daily()
         self.get_time()
         message = f"#{self.feels_like}#{self.humidity}#{self.weather_code}#{self.high_temp}#{self.low_temp}#{self.month}#{self.day}#{self.weekday}#{self.hour}#{self.minute}#{self.second}"
+        print(f'weather data:{message}')
         return message
 
 

@@ -15,6 +15,8 @@ class BLEThread(QThread):
         super().__init__()
         self.ble_manager = ble_manager
         self.running = True
+        self.config_dir = os.path.join(os.path.expanduser('~'), '.ek3')
+        self.config_file = os.path.join(self.config_dir, 'ek3.config')
 
     def run(self):
         # 创建新的事件循环
@@ -180,20 +182,18 @@ class BLEDeviceManager:
             print("Disconnected from device")
 
     def get_ble_address(self):
-        config_path = 'gallery/app/view/ek3.config'
-        if not os.path.exists(config_path):
+        if not os.path.exists(self.config_file):
             return None
-        with open(config_path, 'r', encoding='utf-8') as f:
+        with open(self.config_file, 'r', encoding='utf-8') as f:
             for line in f:
                 if 'ble_address' in line:
                     return line.split('=')[1].strip()
         return None
 
     def get_area(self):
-        config_path = 'gallery/app/view/ek3.config'
-        if not os.path.exists(config_path):
+        if not os.path.exists(self.config_file):
             return None
-        with open(config_path, 'r', encoding='utf-8') as f:
+        with open(self.config_file, 'r', encoding='utf-8') as f:
             for line in f:
                 if 'area_city' in line:
                     area_city = line.split('=')[1].strip()

@@ -18,7 +18,7 @@ class FingerCard(GroupHeaderCardWidget):
         self.lineEdit.setFixedWidth(160)
         self.lineEdit.setPlaceholderText("输入PIN码")
         self.lineEdit.textChanged.connect(self.on_text_changed)
-        self.addGroup(':/gallery/images/password.png', "密码设置", "输入电脑开机密码", self.lineEdit)
+        self.addGroup(':/gallery/images/password.png', "密码设置", "请输入指纹对应的解锁密码", self.lineEdit)
 
         self.switchButton = SwitchButton(self.tr('Off'))
         self.switchButton.checkedChanged.connect(self.onSwitchCheckedChanged)
@@ -264,7 +264,7 @@ class AddFingerCard(GroupHeaderCardWidget):
                         subItem.widget().deleteLater()
         self.groupLayout.removeItem(self.fingerLayouts[order])
         flag = self.uart.finger_delete(order)
-        print(f'remove id:{order}')
+        print(f'remove id:{order}, remove flag:{flag}')
         if flag == 1:
             self.showFingerDelete()
 

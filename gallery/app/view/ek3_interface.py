@@ -61,6 +61,12 @@ class EKInterface(ScrollArea):
         self.config_connect_flag = '0'
         self.config_info = {}
 
+        self.config_dir = os.path.join(os.path.expanduser('~'), '.ek3')
+        self.config_path = os.path.join(self.config_dir, 'ek3.config')
+        # 添加配置文件路径的初始化
+        if not os.path.exists(self.config_dir):
+            os.makedirs(self.config_dir)
+
         self.__initWidget()
         self.ek_connect()
         self.initConfigInfo()
@@ -158,14 +164,24 @@ class EKInterface(ScrollArea):
 
     def update_info(self):
         # 保存 InfoBar 的引用
-        self.updating_info = InfoBar.info(
-            title='正在同步中',
-            content="大约15s，请保持连接",
-            orient=Qt.Horizontal,
-            isClosable=False,  # 禁用手动关闭
-            position=InfoBarPosition.BOTTOM,
-            parent=self
-        )
+        if os.path.exists(self.config_path):
+            self.updating_info = InfoBar.info(
+                title='正在同步中',
+                content="这次很快哦，请保持与EK Home连接",
+                orient=Qt.Horizontal,
+                isClosable=False,  # 禁用手动关闭
+                position=InfoBarPosition.BOTTOM,
+                parent=self
+            )
+        else:
+            self.updating_info = InfoBar.info(
+                title='正在同步中',
+                content="大约30s，请保持与EK Home连接",
+                orient=Qt.Horizontal,
+                isClosable=False,  # 禁用手动关闭
+                position=InfoBarPosition.BOTTOM,
+                parent=self
+            )
         # 使用 QTimer 延迟执行配置更新
         QTimer.singleShot(100, self._do_update)
 
@@ -245,39 +261,28 @@ class EKInterface(ScrollArea):
         return 1
 
     def _do_update(self):
-        # user name
         self.config_info['user_name'] = self.userCard.config_user
-        # area
         self.config_info['area_prov'] = self.areaCard.config_prov
         self.config_info['area_city'] = self.areaCard.config_city
-        # power show
         self.config_info['power_show'] = self.powerCard.config_powerShow_flag
-        # encoder
         self.config_info['encoder'] = self.encoderCard.config_encoder
-        # LED color
         self.config_info['color'] = self.colorCard.config_color
-        # power save
         self.config_info['power_save_start'] = self.powerSaveCard.config_power_start
         self.config_info['power_save_end'] = self.powerSaveCard.config_power_end
         self.config_info['power_deep_save'] = self.powerSaveCard.config_power_deep_flag
-        # finger
         self.config_info['finger_pin'] = self.fingerCard.config_pin
         self.config_info['x_mode'] = self.fingerCard.config_x_flag
         self.config_info['x_input'] = self.fingerCard.config_x_input
-        # auto update
         self.config_info['update'] = self.updateCard.config_update_flag
-        # connect way
         self.config_info['connect'] = self.config_connect_flag
-        # self.config_info['wifi_ssid'] = self.wifiCard.config_wifi_ssid
-        # self.config_info['wifi_ps'] = self.wifiCard.config_wifi_password
         # finger buffer
         self.config_info['finger_id'] = list(self.addFingerCard.fingerBuffer.keys())
         self.config_info['finger_name'] = list(self.addFingerCard.fingerBuffer.values())
 
-        self.config_check()
-
-        self.updateConfigInfo()
         flag = self.uart.updateConfig(self.config_info, self.config_connect_flag)
+        self.updateConfigInfo()
+        self.firstConnectCard.first_connect_flag = True
+        
         
         # 关闭更新中的提示
         if hasattr(self, 'updating_info'):
@@ -293,6 +298,9 @@ class EKInterface(ScrollArea):
                 duration=3000,
                 parent=self
             )
+            # 如果配置成功，则开启串口监听
+            if self.config_connect_flag == '1' and not self.uart.listen_open:
+                self.uart.run_uart_listen()
         else:
             InfoBar.error(
                 title='同步失败',
@@ -304,13 +312,6 @@ class EKInterface(ScrollArea):
                 parent=self
             )
 
-        # 使用 QTimer 延迟执行配置更新
-        if self.wire_run_flag == 0 and self.config_connect_flag == '1':
-            QTimer.singleShot(5000, self.uart.try_connect)
-            QTimer.singleShot(7000, self.uart.wire_update_weather)
-            self.weather_timer = QTimer()
-            self.weather_timer.timeout.connect(lambda: self.uart.wire_update_weather())
-            self.weather_timer.start(60000)  # 60000毫秒 = 1分钟
         if self.ble_run_flag == 0 and self.config_connect_flag == '2':
             self.ble = BLEDeviceManager()
             QTimer.singleShot(5000, self._run_ble)
@@ -341,17 +342,15 @@ class EKInterface(ScrollArea):
     
     # 同步配置到本地文件
     def updateConfigInfo(self):
-        config_path = os.path.join(os.path.dirname(__file__), 'ek3.config')
-        
-        # 如果文件不存在,创建新文件并写入所有配置
-        if not os.path.exists(config_path):
-            with open(config_path, 'w', encoding='utf-8') as f:
+        # 使用实例变量中的配置路径
+        if not os.path.exists(self.config_path):
+            with open(self.config_path, 'w', encoding='utf-8') as f:
                 for key, value in self.config_info.items():
                     f.write(f"{key}={value}\n")
         else:
             # 读取现有配置
             config_dict = {}
-            with open(config_path, 'r', encoding='utf-8') as f:
+            with open(self.config_path, 'r', encoding='utf-8') as f:
                 for line in f:
                     if '=' in line:
                         key, value = line.strip().split('=')
@@ -361,20 +360,18 @@ class EKInterface(ScrollArea):
             config_dict.update(self.config_info)
             
             # 写回文件
-            with open(config_path, 'w', encoding='utf-8') as f:
+            with open(self.config_path, 'w', encoding='utf-8') as f:
                 for key, value in config_dict.items():
                     f.write(f"{key}={value}\n")
 
     # 开启应用时初始化上一次的配置
     def initConfigInfo(self):
-        config_path = os.path.join(os.path.dirname(__file__), 'ek3.config')
-        
-        # 如果配置文件不存在则跳过
-        if not os.path.exists(config_path):
+        # 使用实例变量中的配置路径
+        if not os.path.exists(self.config_path):
             return
             
         # 读取配置文件
-        with open(config_path, 'r', encoding='utf-8') as f:
+        with open(self.config_path, 'r', encoding='utf-8') as f:
             for line in f:
                 line = line.strip()
                 if line and '=' in line:
@@ -489,5 +486,6 @@ class EKInterface(ScrollArea):
             self.ble_run_flag = 1
             self.ble = BLEDeviceManager()
             self._run_ble()
+        
 
         

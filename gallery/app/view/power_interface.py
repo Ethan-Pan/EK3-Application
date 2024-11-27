@@ -66,7 +66,7 @@ class PowerSaveCard(GroupHeaderCardWidget):
         self.switchButton = SwitchButton(self.tr('Off'))
         self.switchButton.checkedChanged.connect(self.onSwitchCheckedChanged)
 
-        self.addGroup(':/gallery/images/deepSavePower.png', "深度省电模式", "开启后屏幕刷新率变低", self.switchButton)
+        self.addGroup(':/gallery/images/deepSavePower.png', "深度省电模式", "屏幕关闭常亮显示", self.switchButton)
 
         self.timerStart.timeChanged.connect(self.onStartTimeChanged)
         self.timerEnd.timeChanged.connect(self.onEndTimeChanged)

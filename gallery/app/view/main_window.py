@@ -1,8 +1,8 @@
 # coding: utf-8
 from typing import List
 from PySide6.QtCore import Qt, Signal, QEasingCurve, QUrl, QSize, QTimer
-from PySide6.QtGui import QIcon, QDesktopServices, QColor
-from PySide6.QtWidgets import QApplication, QHBoxLayout, QFrame, QWidget
+from PySide6.QtGui import QIcon, QDesktopServices, QColor, QAction
+from PySide6.QtWidgets import QApplication, QHBoxLayout, QFrame, QWidget, QSystemTrayIcon, QMenu
 
 from qfluentwidgets import (NavigationAvatarWidget, NavigationItemPosition, MessageBox, FluentWindow, MSFluentWindow,
                             SplashScreen, SystemThemeListener, isDarkTheme)
@@ -41,6 +41,39 @@ class MainWindow(MSFluentWindow):
 
         # start theme listener
         self.themeListener.start()
+
+        # 初始化系统托盘图标
+        self.trayIcon = QSystemTrayIcon(self)
+        self.trayIcon.setIcon(QIcon(":/gallery/images/logo_ek3_black.png"))
+
+        # 创建托盘菜单
+        self.trayMenu = QMenu()
+        self.showAction = QAction("显示", self, triggered=self.show_window)
+        self.quitAction = QAction("退出", self, triggered=self.exit_window)
+        self.trayMenu.addAction(self.showAction)
+        self.trayMenu.addAction(self.quitAction)
+        self.trayIcon.setContextMenu(self.trayMenu)
+
+        self.trayIcon.activated.connect(self.onTrayIconActivated)
+
+        self.trayIcon.show()
+
+    def onTrayIconActivated(self, reason):
+        if reason == QSystemTrayIcon.ActivationReason.Trigger:
+            self.show()
+
+    
+    def closeEvent(self, event):
+        self.hide()
+        event.ignore()
+        
+    def show_window(self):
+        self.show()
+        self.activateWindow()
+    
+    def exit_window(self):
+        self.trayIcon.hide()
+        QApplication.quit()
 
     def connectSignalToSlot(self):
         signalBus.micaEnableChanged.connect(self.setMicaEffectEnabled)
@@ -86,10 +119,10 @@ class MainWindow(MSFluentWindow):
         if hasattr(self, 'splashScreen'):
             self.splashScreen.resize(self.size())
 
-    def closeEvent(self, e):
-        self.themeListener.terminate()
-        self.themeListener.deleteLater()
-        super().closeEvent(e)
+    # def closeEvent(self, e):
+    #     self.themeListener.terminate()
+    #     self.themeListener.deleteLater()
+    #     super().closeEvent(e)
 
     def _onThemeChangedFinished(self):
         super()._onThemeChangedFinished()
