@@ -59,7 +59,7 @@ AUTHOR = "JML STUDIO"
 VERSION = __version__
 HELP_URL = "https://github.com/Ethan-Pan/EK3-User-manual/blob/main/README.md"
 REPO_URL = "https://github.com/Ethan-Pan?tab=repositories"
-EXAMPLE_URL = "https://oshwhub.com/li-chuang-kai-fa-ban/li-chuang-tai-shan-pai-kai-fa-ban"
+EXAMPLE_URL = "https://oshwhub.com/ethanpan/ek3"
 FEEDBACK_URL = "https://github.com/Ethan-Pan/EK3-User-manual/issues"
 RELEASE_URL = "https://github.com/zhiyiYo/PyQt-Fluent-Widgets/releases/latest"
 ZH_SUPPORT_URL = "https://qfluentwidgets.com/zh/price/"
