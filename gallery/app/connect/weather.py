@@ -1,10 +1,10 @@
 import requests
 from datetime import datetime
 
-
+# https://api.seniverse.com/v3/weather/now.json?key=SopS99tRo91DaoxpD&location=shenzhen&language=zh-Hans&unit=c
 class WeatherAPI:
     def __init__(self, city_id):
-        self.api_key = 'SIRIAINjNneIGVRpR'
+        self.api_key = 'SopS99tRo91DaoxpD'   # 心知天气 API KEY one year valid from 2024-11-29
         self.city_id = city_id
         self.feels_like = None
         self.humidity = None

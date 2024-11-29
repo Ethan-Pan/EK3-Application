@@ -334,6 +334,10 @@
    'C:\\Users\\12609\\Documents\\Cursor '
    'project\\Python\\EK3\\ek3\\gallery\\app\\connect\\ek_keyboard.py',
    'PYMODULE'),
+  ('app.connect.ota',
+   'C:\\Users\\12609\\Documents\\Cursor '
+   'project\\Python\\EK3\\ek3\\gallery\\app\\connect\\ota.py',
+   'PYMODULE'),
   ('app.connect.uart',
    'C:\\Users\\12609\\Documents\\Cursor '
    'project\\Python\\EK3\\ek3\\gallery\\app\\connect\\uart.py',

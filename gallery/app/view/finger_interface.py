@@ -32,7 +32,7 @@ class FingerCard(GroupHeaderCardWidget):
         self.xLineEdit.textChanged.connect(self.on_xInput_text_changed)
 
 
-        self.visible = self.addGroup(':/gallery/images/x.png', "X键设置", "输入自定义宏按键", self.xLineEdit)
+        self.visible = self.addGroup(':/gallery/images/x.png', "X键设置", "输入自定义宏按键, 比如：CTRL+F, WIN+L, F5, SHIFT+F10", self.xLineEdit)
         self.visible.setVisible(False)
 
     def onSwitchCheckedChanged(self, isChecked):

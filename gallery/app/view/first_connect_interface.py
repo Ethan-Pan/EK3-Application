@@ -61,8 +61,8 @@ class FirstConnectCard(GroupHeaderCardWidget):
             self.button.setText('已连接')
             self.button.setEnabled(False)
 
-            # if not self.uartConnect.listen_open:
-            #     self.uartConnect.run_uart_listen()
+            if self.first_connect_flag and not self.uartConnect.listen_open:
+                self.uartConnect.run_uart_listen()
             
             if not self.first_connect_flag:
                 self.timer_check_connect.start(1000)

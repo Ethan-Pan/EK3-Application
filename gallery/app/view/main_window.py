@@ -58,6 +58,10 @@ class MainWindow(MSFluentWindow):
 
         self.trayIcon.show()
 
+        # 自动检查更新
+        if self.settingInterface.auto_update_flag:
+            self.settingInterface.auto_check_update()
+
     def onTrayIconActivated(self, reason):
         if reason == QSystemTrayIcon.ActivationReason.Trigger:
             self.show()

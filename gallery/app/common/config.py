@@ -55,7 +55,7 @@ class Config(QConfig):
   
 
 YEAR = 2024
-AUTHOR = "Ethan"
+AUTHOR = "JML STUDIO"
 VERSION = __version__
 HELP_URL = "https://github.com/Ethan-Pan/EK3-User-manual/blob/main/README.md"
 REPO_URL = "https://github.com/Ethan-Pan?tab=repositories"

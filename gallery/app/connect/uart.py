@@ -18,15 +18,13 @@ class FingerEnrollThread(QThread):
     def run(self):
         try:
             self.uart.ser.write(('#01'+str(self.finger_id)+'$').encode())
-            
             # 循环检查响应，最多等待12秒
             for _ in range(24):  # 24 * 0.5s = 12s
                 time.sleep(0.5)
-                if self.uart.listen_open and self.uart.receive_ack:
-                    self.uart.receive_ack = False
+                if self.uart.finger_success:
                     response = self.uart.response
                     print(f'enroll response:{response}')
-                    if 'ok' in response:
+                    if 'ok' in response or '242' in response:
                         self.uart.response = None
                         self.uart.connected = True
                         self.finished.emit(1)
@@ -86,6 +84,7 @@ class UartConnect():
         self.listen_open = False
         self.receive_ack = False
         self.response = None
+        self.finger_success = False
         self.ota = ota.Ota()
         self.last_connect_time = None
         # self.connect_port('COM3')
@@ -121,34 +120,53 @@ class UartConnect():
         self.connected = True
         if 'AT+WEATHER' in message:
             self.wire_update_weather()
-            self.receive_ack = False
-            self.response = None
             
         if 'AT+VERSION' in message:
             self.wire_check_version(message)
-            self.receive_ack = False
-            self.response = None
         
+        if 'AT+DOWNLOAD' in message:
+            self.wire_download_firmware()
+
         if 'AT+UPDATE' in message:
             self.wire_update_firmware()
-            self.receive_ack = False
-            self.response = None
+        
+        if 'ok' in message:
+            self.finger_success = True
 
-        if 'AT+CONNECT' in message:
-            self.connected = True
-            self.last_connect_time = time.time()
             
     def wire_check_version(self, message):
-        cur_version = message.split('+VERSION:')[1].strip()
+        cur_version = message.split('+VERSION=')[1].strip()
         lastest_version = self.ota.check_version('EK3-firmware')
         if cur_version != lastest_version:
             self.ser.write(('#0a1'+lastest_version+'$').encode())
         else:
             self.ser.write(('#0a0$').encode())
     
+    def wire_download_firmware(self):
+        flag = self.ota.downLoad()
+        if flag:
+            print('firmware download success')
+            self.ser.write(('#0a2$').encode())
+        else:
+            print('firmware download failed')
+            self.ser.write(('#0a3$').encode())
+        
     def wire_update_firmware(self):
-        self.ota.downLoad()
+        self.uarthread.stop()
+        self.disconnect()
+        print(f'port:{self.port}')
         self.ota.flash_firmware(self.port)
+        if self.first_connect_flag:
+            if not self.check_connection():
+                print('try connect')
+                if self.try_connect():
+                    self.connected = True
+                    self.run_uart_listen()
+            elif not self.listen_open:
+                print('run uart listen')
+                self.connected = True
+                self.run_uart_listen()
+
 
 
     def scan_ports(self):
@@ -181,7 +199,6 @@ class UartConnect():
         if self.ser and self.ser.is_open:
             self.ser.close()
         self.ser = None
-        self.port = None
         self.connected = False
     
     def check_connection(self):
@@ -430,7 +447,7 @@ class UartConnect():
                 self.add_ble_address(address)
 
         print(f'uart updateConfig flag:{flag}, update_count:{update_count}')
-        if flag >= update_count:
+        if flag >= update_count-1:
             # 发送重启命令
             command = '#060$'
             self.send_command(command)

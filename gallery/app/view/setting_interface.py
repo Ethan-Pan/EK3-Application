@@ -6,6 +6,7 @@ from qfluentwidgets import (SettingCardGroup, SwitchSettingCard, FolderListSetti
                             setTheme, setThemeColor, RangeSettingCard, isDarkTheme)
 from qfluentwidgets import FluentIcon as FIF
 from qfluentwidgets import InfoBar
+from qfluentwidgets import Dialog
 from PySide6.QtCore import Qt, Signal, QUrl, QStandardPaths
 from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import QWidget, QLabel, QFileDialog
@@ -13,7 +14,8 @@ from PySide6.QtWidgets import QWidget, QLabel, QFileDialog
 from ..common.config import cfg, HELP_URL, FEEDBACK_URL, AUTHOR, VERSION, YEAR, isWin11
 from ..common.signal_bus import signalBus
 from ..common.style_sheet import StyleSheet
-
+from ..connect.ota import Ota
+import os
 
 class SettingInterface(ScrollArea):
     """ Setting interface """
@@ -22,7 +24,10 @@ class SettingInterface(ScrollArea):
         super().__init__(parent=parent)
         self.scrollWidget = QWidget()
         self.expandLayout = ExpandLayout(self.scrollWidget)
-
+        self.ota = Ota()
+        self.savePath = os.path.join(os.path.expanduser('~'), '.ek3', 'auto_update.config')
+        self.auto_update_flag = self.auto_update_flag()
+        
         # setting label
         self.settingLabel = QLabel(self.tr("Settings"), self)
 
@@ -88,7 +93,7 @@ class SettingInterface(ScrollArea):
             configItem=cfg.checkUpdateAtStartUp,
             parent=self.updateSoftwareGroup
         )
-
+        self.updateOnStartUpCard.switchButton.checkedChanged.connect(self.save_update_config)
         # application
         self.aboutGroup = SettingCardGroup(self.tr('关于'), self.scrollWidget)
         self.helpCard = HyperlinkCard(
@@ -115,7 +120,7 @@ class SettingInterface(ScrollArea):
             self.tr('Version') + " " + VERSION,
             self.aboutGroup
         )
-
+        self.aboutCard.button.clicked.connect(self.check_update)
         self.__initWidget()
 
     def __initWidget(self):
@@ -191,3 +196,69 @@ class SettingInterface(ScrollArea):
         # about
         self.feedbackCard.clicked.connect(
             lambda: QDesktopServices.openUrl(QUrl(FEEDBACK_URL)))
+
+
+    def auto_update_flag(self):
+        if os.path.exists(self.savePath):
+            with open(self.savePath, 'r') as f:
+                return f.read() == '1'
+        else:
+            os.makedirs(os.path.dirname(self.savePath), exist_ok=True)
+            with open(self.savePath, 'w') as f:
+                f.write('1')
+            return False
+
+    def save_update_config(self, isChecked):
+        if isChecked:
+            with open(self.savePath, 'w') as f:
+                f.write('1')
+        else:
+            with open(self.savePath, 'w') as f:
+                f.write('0')
+
+    def check_update(self):
+        latest_version = self.ota.check_version('EK-Home-release')
+        print(f'latest_version:{latest_version}')
+        if latest_version != VERSION:
+            self._show_update_dialog(latest_version)
+        else:
+            self._show_no_update_dialog()
+
+    def _show_update_dialog(self, latest_version):
+        title = '检测更新完成'
+        content = "找到新版本EK-Home-release-" + latest_version + "，确定下载吗？"
+        w = Dialog(title, content, self)
+        w.setTitleBarVisible(False)
+        if w.exec():
+            url = self.ota.ota_url + 'EK-Home-release-' + latest_version + '.exe'
+            if QUrl(url).isValid():
+                QDesktopServices.openUrl(QUrl(url))
+        else:
+            print('Cancel button is pressed')
+    
+    def _show_no_update_dialog(self):
+        title = '检测更新完成'
+        content = "当前版本EK-Home-release-" + VERSION + "已是最新版本"
+        w = Dialog(title, content, self)
+        # w.setTitleBarVisible(False)
+        # w.setContentCopyable(True)
+        if w.exec():
+            print('Yes button is pressed')
+        else:
+            print('Cancel button is pressed')
+
+    def auto_check_update(self):
+        latest_version = self.ota.check_version('EK-Home-release')
+        if latest_version != VERSION:
+            title = '检测到EK Home新版本'
+            content = "找到新版本EK-Home-release-" + latest_version + "，确定下载吗？"
+            w = Dialog(title, content, self)
+            w.setTitleBarVisible(False)
+            # w.setContentCopyable(True)
+            if w.exec():
+                url = self.ota.ota_url + 'EK-Home-release-' + latest_version + '.exe'
+                if QUrl(url).isValid():
+                    QDesktopServices.openUrl(QUrl(url))
+            else:
+                print('Cancel button is pressed')
+

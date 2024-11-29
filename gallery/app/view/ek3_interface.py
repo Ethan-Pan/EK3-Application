@@ -207,9 +207,9 @@ class EKInterface(ScrollArea):
         power_save_end = self.powerSaveCard.config_power_end
         # 检查睡眠时间是否为空,为空则设置默认值
         if power_save_start == '':
-            self.powerSaveCard.config_power_start = '20:00'
+            self.powerSaveCard.config_power_start = '09:30'
         if power_save_end == '':
-            self.powerSaveCard.config_power_end = '09:30'
+            self.powerSaveCard.config_power_end = '22:00'
         # 检查指纹PIN码是否为空且x模式关闭
         if self.fingerCard.config_pin == '' and self.fingerCard.config_x_flag == '0':
             InfoBar.warning(
