@@ -4,7 +4,7 @@ import asyncio
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QWidget, QVBoxLayout
 from qfluentwidgets import (PrimaryPushButton,ScrollArea, PrimaryPushButton,TransparentToolButton,InfoBar,InfoBarPosition)
-from qfluentwidgets import ScrollArea
+from qfluentwidgets import ScrollArea, FlyoutView, Flyout, PushButton
 from qfluentwidgets import FluentIcon as FIF
 from functools import partial
 from ..common.style_sheet import StyleSheet
@@ -50,13 +50,14 @@ class EKInterface(ScrollArea):
         # self.wifiCard = WifiInterface()
         self.upDataButton = PrimaryPushButton(FIF.UPDATE, '一键同步配置')
         self.upDataButton.clicked.connect(self.on_update_clicked)
-
+        self.first_config_flag = False
         self.ble_run_flag = 0
         self.wire_run_flag = 0
 
         # self.conectCard.nav.wifiSwitchButton.checkedChanged.connect(self.showWifiInput)
         self.conectCard.nav.bleSwitchButton.checkedChanged.connect(self.bleSwitchState)
         self.conectCard.nav.wireSwitchButton.checkedChanged.connect(self.wireSwitchState)
+        self.conectCard.nav.bleSwitchButton.setEnabled(False)
 
         self.config_connect_flag = '0'
         self.config_info = {}
@@ -64,6 +65,7 @@ class EKInterface(ScrollArea):
         self.config_dir = os.path.join(os.path.expanduser('~'), '.ek3')
         self.config_path = os.path.join(self.config_dir, 'ek3.config')
         # 添加配置文件路径的初始化
+
         if not os.path.exists(self.config_dir):
             os.makedirs(self.config_dir)
 
@@ -174,6 +176,7 @@ class EKInterface(ScrollArea):
                 parent=self
             )
         else:
+            self.first_config_flag = True
             self.updating_info = InfoBar.info(
                 title='正在同步中',
                 content="大约30s，请保持与EK Home连接",
@@ -298,6 +301,9 @@ class EKInterface(ScrollArea):
                 duration=3000,
                 parent=self
             )
+            if self.first_config_flag and self.config_connect_flag == '1':
+                self.first_config_flag = False
+                self.showConnectFlyout()
             # 如果配置成功，则开启串口监听
             if self.config_connect_flag == '1' and not self.uart.listen_open:
                 self.uart.run_uart_listen()
@@ -339,6 +345,19 @@ class EKInterface(ScrollArea):
         self.ble.stop_background_task()
         event.accept()
     
+    def showConnectFlyout(self):
+        view = FlyoutView(
+            title='第一次同步成功时',
+            content="请在PC蓝牙端搜索名称为"+self.config_info['user_name']+"'s EK3的设备并连接",
+            image=':/gallery/images/ble_connect.gif',
+            isClosable=True
+        )
+        view.widgetLayout.insertSpacing(1, 5)
+        view.widgetLayout.addSpacing(5)
+
+        # show view
+        w = Flyout.make(view, self.upDataButton, self)
+        view.closed.connect(w.close)
     
     # 同步配置到本地文件
     def updateConfigInfo(self):

@@ -88,6 +88,7 @@ class UartConnect():
         self.ota = ota.Ota()
         self.last_connect_time = None
         # self.connect_port('COM3')
+        self.scan_ports()
         self.config_dir = os.path.join(os.path.expanduser('~'), '.ek3')
         self.config_file = os.path.join(self.config_dir, 'ek3.config')
         self.first_connect_flag = os.path.exists(self.config_file)
@@ -173,22 +174,22 @@ class UartConnect():
         """扫描所有串口并返回包含'CH340'的端口列表"""
         ports = []
         for p in serial.tools.list_ports.comports():
-            if 'CH340' in p.description:
+            if 'CH340' in p.description or 'USB' in p.description:
                 ports.append(p.device)
         return ports
         
     def connect_port(self, port):
         """尝试连接指定串口"""
         try:
-            self.ser = None
-            self.ser = serial.Serial(
-                port=port,
-                baudrate=115200,
-                bytesize=8,
-                parity='N',
-                stopbits=1,
-                timeout=1
-            )
+            # self.ser = serial.Serial(
+            #     port=port,
+            #     baudrate=115200,
+            #     bytesize=8,
+            #     parity='N',
+            #     stopbits=1,
+            #     timeout=1,
+            # )
+            self.ser = serial.Serial(port, 115200, timeout=1)
             self.port = port
             return True
         except:
@@ -245,9 +246,13 @@ class UartConnect():
                 print(f"无法打开串口 {port}")
                 continue
 
+            # 增加延时确保设备就绪
+            time.sleep(1)  
+
             # 发送测试命令
             try:
                 self.ser.write('#001$'.encode())
+                print(f'send command:#001$')
                 time.sleep(1)  # 等待响应
                 if self.ser.in_waiting:
                     response = self.ser.readline().decode().strip()

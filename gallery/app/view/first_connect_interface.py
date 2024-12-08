@@ -121,7 +121,7 @@ class FirstConnectCard(GroupHeaderCardWidget):
                 self.uart_last_state = False
                 self.button.setText('连接中')
                 self.button.setEnabled(False)
-                print('connect failed222')
+                self.connect_failed()
                 InfoBar.error(
                     title='连接失败',
                     content="请保持连接并已安装CH340驱动！",

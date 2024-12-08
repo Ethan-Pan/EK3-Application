@@ -36,6 +36,16 @@ class Keyboard:
 
     def music_pause(self):
         pyautogui.press('playpause')
+
+    def key_up(self):
+        pyautogui.press('up')
+        pyautogui.press('up')
+        pyautogui.press('up')
+    
+    def key_down(self):
+        pyautogui.press('down')
+        pyautogui.press('down')
+        pyautogui.press('down')
     
     def finger_up(self, text):
         pyautogui.typewrite(text)
@@ -43,8 +53,3 @@ class Keyboard:
 
 if __name__ == '__main__':
     keyboard = Keyboard()
-    # 模拟按下 L 键
-    pyautogui.keyDown('win')
-    pyautogui.keyDown('l')
-    pyautogui.keyUp('l')
-    pyautogui.keyUp('win')

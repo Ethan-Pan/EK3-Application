@@ -23,6 +23,7 @@
         <file>images/xInput.png</file>
         <file>images/wifi_ssid.png</file>
         <file>images/wifi_password.png</file>
+        <file>images/ble_connect.gif</file>
 
         <file>qss/dark/ek_interface.qss</file>
         <file>qss/dark/setting_interface.qss</file>

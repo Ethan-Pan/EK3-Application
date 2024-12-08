@@ -53,6 +53,7 @@ class BLEThread(QThread):
 
 class BLEDeviceManager:
     def __init__(self):
+        self.config_file = os.path.join(os.path.expanduser('~'), '.ek3', 'ek3.config')
         self.device_address = self.get_ble_address()
         self.characteristic_uuid = "beb5483e-36e1-4688-b7f5-ea07361b26a8"
         self.send_interval = 60
@@ -62,6 +63,7 @@ class BLEDeviceManager:
         self.keyboard = ek_keyboard.Keyboard()
         self.message = weather.WeatherAPI(self.get_area())
         self.thread = None
+        
 
     async def scan_for_device(self):
         devices = await BleakScanner.discover()
@@ -169,6 +171,10 @@ class BLEDeviceManager:
             self.keyboard.music_play()
         elif key == "$228#":
             self.keyboard.music_pause()
+        elif key == "$229#":
+            self.keyboard.key_up()
+        elif key == "$230#":
+            self.keyboard.key_down()
         elif key == "$111#":
             self.keyboard.finger_up('a10030928')
     
