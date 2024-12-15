@@ -1,9 +1,9 @@
-('C:\\Users\\12609\\Documents\\Cursor '
- 'project\\Python\\EK3\\ek3\\gallery\\build\\ek\\ek.exe',
+('D:\\Users\\Documents\\Cursor '
+ 'Project\\Python\\EK-Home-Desktop-main\\gallery\\build\\ek\\ek.exe',
  False,
  False,
  True,
- ['C:\\Users\\12609\\Desktop\\ek.ico'],
+ ['D:\\Users\\Desktop\\ek.ico'],
  None,
  False,
  False,
@@ -30,69 +30,69 @@
  None,
  None,
  None,
- 'C:\\Users\\12609\\Documents\\Cursor '
- 'project\\Python\\EK3\\ek3\\gallery\\build\\ek\\ek.pkg',
+ 'D:\\Users\\Documents\\Cursor '
+ 'Project\\Python\\EK-Home-Desktop-main\\gallery\\build\\ek\\ek.pkg',
  [('pyi-contents-directory _internal', '', 'OPTION'),
   ('PYZ-00.pyz',
-   'C:\\Users\\12609\\Documents\\Cursor '
-   'project\\Python\\EK3\\ek3\\gallery\\build\\ek\\PYZ-00.pyz',
+   'D:\\Users\\Documents\\Cursor '
+   'Project\\Python\\EK-Home-Desktop-main\\gallery\\build\\ek\\PYZ-00.pyz',
    'PYZ'),
   ('struct',
-   'C:\\Users\\12609\\Documents\\Cursor '
-   'project\\Python\\EK3\\ek3\\gallery\\build\\ek\\localpycs\\struct.pyc',
+   'D:\\Users\\Documents\\Cursor '
+   'Project\\Python\\EK-Home-Desktop-main\\gallery\\build\\ek\\localpycs\\struct.pyc',
    'PYMODULE'),
   ('pyimod01_archive',
-   'C:\\Users\\12609\\Documents\\Cursor '
-   'project\\Python\\EK3\\ek3\\gallery\\build\\ek\\localpycs\\pyimod01_archive.pyc',
+   'D:\\Users\\Documents\\Cursor '
+   'Project\\Python\\EK-Home-Desktop-main\\gallery\\build\\ek\\localpycs\\pyimod01_archive.pyc',
    'PYMODULE'),
   ('pyimod02_importers',
-   'C:\\Users\\12609\\Documents\\Cursor '
-   'project\\Python\\EK3\\ek3\\gallery\\build\\ek\\localpycs\\pyimod02_importers.pyc',
+   'D:\\Users\\Documents\\Cursor '
+   'Project\\Python\\EK-Home-Desktop-main\\gallery\\build\\ek\\localpycs\\pyimod02_importers.pyc',
    'PYMODULE'),
   ('pyimod03_ctypes',
-   'C:\\Users\\12609\\Documents\\Cursor '
-   'project\\Python\\EK3\\ek3\\gallery\\build\\ek\\localpycs\\pyimod03_ctypes.pyc',
+   'D:\\Users\\Documents\\Cursor '
+   'Project\\Python\\EK-Home-Desktop-main\\gallery\\build\\ek\\localpycs\\pyimod03_ctypes.pyc',
    'PYMODULE'),
   ('pyimod04_pywin32',
-   'C:\\Users\\12609\\Documents\\Cursor '
-   'project\\Python\\EK3\\ek3\\gallery\\build\\ek\\localpycs\\pyimod04_pywin32.pyc',
+   'D:\\Users\\Documents\\Cursor '
+   'Project\\Python\\EK-Home-Desktop-main\\gallery\\build\\ek\\localpycs\\pyimod04_pywin32.pyc',
    'PYMODULE'),
   ('pyiboot01_bootstrap',
-   'D:\\Users\\12609\\anaconda3\\envs\\ek3\\lib\\site-packages\\PyInstaller\\loader\\pyiboot01_bootstrap.py',
+   'C:\\ProgramData\\Anaconda3\\envs\\ek3\\lib\\site-packages\\PyInstaller\\loader\\pyiboot01_bootstrap.py',
    'PYSOURCE'),
   ('pyi_rth_pyside6',
-   'D:\\Users\\12609\\anaconda3\\envs\\ek3\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_pyside6.py',
+   'C:\\ProgramData\\Anaconda3\\envs\\ek3\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_pyside6.py',
    'PYSOURCE'),
   ('pyi_rth_inspect',
-   'D:\\Users\\12609\\anaconda3\\envs\\ek3\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_inspect.py',
+   'C:\\ProgramData\\Anaconda3\\envs\\ek3\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_inspect.py',
    'PYSOURCE'),
   ('pyi_rth_pkgutil',
-   'D:\\Users\\12609\\anaconda3\\envs\\ek3\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_pkgutil.py',
+   'C:\\ProgramData\\Anaconda3\\envs\\ek3\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_pkgutil.py',
    'PYSOURCE'),
   ('pyi_rth_multiprocessing',
-   'D:\\Users\\12609\\anaconda3\\envs\\ek3\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_multiprocessing.py',
+   'C:\\ProgramData\\Anaconda3\\envs\\ek3\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_multiprocessing.py',
    'PYSOURCE'),
   ('pyi_rth__tkinter',
-   'D:\\Users\\12609\\anaconda3\\envs\\ek3\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth__tkinter.py',
+   'C:\\ProgramData\\Anaconda3\\envs\\ek3\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth__tkinter.py',
    'PYSOURCE'),
   ('pyi_rth_pkgres',
-   'D:\\Users\\12609\\anaconda3\\envs\\ek3\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_pkgres.py',
+   'C:\\ProgramData\\Anaconda3\\envs\\ek3\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_pkgres.py',
    'PYSOURCE'),
   ('pyi_rth_setuptools',
-   'D:\\Users\\12609\\anaconda3\\envs\\ek3\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_setuptools.py',
+   'C:\\ProgramData\\Anaconda3\\envs\\ek3\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_setuptools.py',
    'PYSOURCE'),
   ('pyi_rth_cryptography_openssl',
-   'D:\\Users\\12609\\anaconda3\\envs\\ek3\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\rthooks\\pyi_rth_cryptography_openssl.py',
+   'C:\\ProgramData\\Anaconda3\\envs\\ek3\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\rthooks\\pyi_rth_cryptography_openssl.py',
    'PYSOURCE'),
   ('ek',
-   'C:\\Users\\12609\\Documents\\Cursor '
-   'project\\Python\\EK3\\ek3\\gallery\\ek.py',
+   'D:\\Users\\Documents\\Cursor '
+   'Project\\Python\\EK-Home-Desktop-main\\gallery\\ek.py',
    'PYSOURCE')],
  [],
  False,
  False,
- 1733666539,
+ 1733997877,
  [('runw.exe',
-   'D:\\Users\\12609\\anaconda3\\envs\\ek3\\lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit-intel\\runw.exe',
+   'C:\\ProgramData\\Anaconda3\\envs\\ek3\\lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit-intel\\runw.exe',
    'EXECUTABLE')],
- 'D:\\Users\\12609\\anaconda3\\envs\\ek3\\python38.dll')
+ 'C:\\ProgramData\\Anaconda3\\envs\\ek3\\python38.dll')

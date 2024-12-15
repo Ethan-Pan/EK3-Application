@@ -273,6 +273,7 @@ class EKInterface(ScrollArea):
         self.config_info['power_save_start'] = self.powerSaveCard.config_power_start
         self.config_info['power_save_end'] = self.powerSaveCard.config_power_end
         self.config_info['power_deep_save'] = self.powerSaveCard.config_power_deep_flag
+        self.config_info['power_night'] = self.powerSaveCard.config_power_night_flag
         self.config_info['finger_pin'] = self.fingerCard.config_pin
         self.config_info['x_mode'] = self.fingerCard.config_x_flag
         self.config_info['x_input'] = self.fingerCard.config_x_input
@@ -292,6 +293,8 @@ class EKInterface(ScrollArea):
             self.updating_info.close()
         
         if flag == 1:
+            self.uart.first_connect_flag = True
+            self.firstConnectCard.first_connect_flag = True
             InfoBar.success(
                 title='同步成功',
                 content="请使用你的EK3吧",
@@ -432,6 +435,19 @@ class EKInterface(ScrollArea):
         else:
             self.powerSaveCard.switchButton.setChecked(False)
             self.powerSaveCard.switchButton.setText('Off')
+         # power night
+        try:
+            if self.config_info['power_night'] == '1':
+                self.powerSaveCard.turnOffButton.setChecked(True)
+                self.powerSaveCard.turnOffButton.setText('On')
+            else:
+                self.powerSaveCard.turnOffButton.setChecked(False)
+                self.powerSaveCard.turnOffButton.setText('Off')
+        except: 
+            self.config_info['power_night'] = '1'  # 防止更新用户在读取配置时，没有power night选项
+            self.powerSaveCard.turnOffButton.setChecked(True)
+            self.powerSaveCard.turnOffButton.setText('On')
+        self.powerSaveCard.config_power_night_flag = self.config_info['power_night']
         # finger
         self.fingerCard.lineEdit.setText(self.config_info['finger_pin'] )
         if self.config_info['x_mode'] == '1':

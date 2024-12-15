@@ -34,7 +34,7 @@ class AreaCard(GroupHeaderCardWidget):
         self.textLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.comboProv = ComboBox()
-        self.comboProv.addItems(['广东'])
+        self.comboProv.addItems(['广东','陕西', '浙江'])
         self.comboCity = ComboBox()
         self.comboCity.addItems(['深圳', '东莞', '广州', '惠州', '中山'])
         self.config_prov = '广东'
@@ -50,6 +50,15 @@ class AreaCard(GroupHeaderCardWidget):
         
     def on_prov_changed(self, text):
         """当省份选择改变时触发"""
+        if text == '广东':
+            self.comboCity.clear()
+            self.comboCity.addItems(['深圳', '东莞', '广州', '惠州', '中山'])
+        elif text == '陕西':
+            self.comboCity.clear()
+            self.comboCity.addItems(['西安'])
+        elif text == '浙江':
+            self.comboCity.clear()
+            self.comboCity.addItems(['杭州'])
         self.config_prov = text
         
     def on_city_changed(self, text):

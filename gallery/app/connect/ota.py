@@ -74,28 +74,63 @@ class Ota:
                 print(f"下载出错：{str(e)}")
             return False
 
-    def flash_firmware(self, port):        
+    def flash_firmware(self, port):
         if self.latest_version:
             firmware_name = 'EK3-firmware-' + self.latest_version + '.bin'
-            # 确保目录存在
-            os.makedirs(os.path.dirname(self.ota_save_path), exist_ok=True)
-                
-            # 烧录固件
-            command = [
-                'esptool',
-                '--chip', 'esp32',
-                '--port', port,
-                '--baud', '921600',
-                'write_flash', '0x10000',
-                self.ota_save_path + '/' + firmware_name
-            ]
-
             try:
-                result = subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                print(result.stdout.decode())
-                return True
-            except subprocess.CalledProcessError as e:
-                print(f"Error: {e.stderr.decode()}")
+                import ctypes
+                import sys
+                
+                kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
+
+                kernel32.AllocConsole()
+                
+                # 保存原始的标准输入输出
+                old_stdout = sys.stdout
+                old_stderr = sys.stderr
+                
+                # 创建新的输出流
+                stdout = open('CONOUT$', 'w')
+                stderr = open('CONOUT$', 'w')
+                
+                sys.stdout = stdout
+                sys.stderr = stderr
+                
+                print("开始固件更新，请勿断开设备...")
+                
+                import esptool
+                command = [
+                    '--chip', 'esp32',
+                    '--port', port,
+                    '--baud', '921600',
+                    'write_flash', '0x10000',
+                    self.ota_save_path + '/' + firmware_name
+                ]
+                
+                try:
+                    esptool.main(command)
+                    print("\n固件更新成功！")
+                    success = True
+                except Exception as e:
+                    print(f"\n固件更新失败：{str(e)}")
+                    success = False
+                    raise e
+                finally:
+                    # 恢复原始的标准输出
+                    sys.stdout = old_stdout
+                    sys.stderr = old_stderr
+                    
+                    # 关闭输出流
+                    stdout.close()
+                    stderr.close()
+                    
+                    # 释放控制台
+                    kernel32.FreeConsole()
+                
+                return success
+                
+            except Exception as e:
+                print(f"烧录错误: {str(e)}")
                 return False
 
 # 使用示例

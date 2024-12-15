@@ -156,8 +156,9 @@ class UartConnect():
         self.uarthread.stop()
         self.disconnect()
         print(f'port:{self.port}')
-        self.ota.flash_firmware(self.port)
-        if self.first_connect_flag:
+        flag = self.ota.flash_firmware(self.port)
+        if flag:
+            time.sleep(6)
             if not self.check_connection():
                 print('try connect')
                 if self.try_connect():
@@ -181,16 +182,29 @@ class UartConnect():
     def connect_port(self, port):
         """尝试连接指定串口"""
         try:
+            # 初始化串口
             # self.ser = serial.Serial(
-            #     port=port,
-            #     baudrate=115200,
-            #     bytesize=8,
-            #     parity='N',
-            #     stopbits=1,
+            #     port=port,         # 替换为你的串口号
+            #     baudrate=115200,     # 设置波特率，与 ESP32 一致
+            #     bytesize=serial.EIGHTBITS,
+            #     parity=serial.PARITY_NONE,
+            #     stopbits=serial.STOPBITS_ONE,
             #     timeout=1,
+            #     dsrdtr=False,        # 禁用 DTR 信号
+            #     rtscts=False         # 禁用 RTS 信号
             # )
-            self.ser = serial.Serial(port, 115200, timeout=1)
+            if self.ser and self.ser.is_open:
+                self.ser.close()
+            self.ser = serial.Serial()
+            self.ser.dtr = False
+            self.ser.rts = False
+            self.ser.port = port
+            self.ser.baudrate = 115200
+            self.ser.timeout = 1.0
+            self.ser.write_timeout = 1.0
             self.port = port
+            self.ser.open()
+            print(f'ser is open')
             return True
         except:
             return False
@@ -211,7 +225,7 @@ class UartConnect():
         if self.connected:
             try:
                 self.ser.write('#001$'.encode())
-                time.sleep(0.3)
+                time.sleep(1)
                 if self.ser.in_waiting:
                     response = self.ser.readline().decode().strip()
                     if response:
@@ -251,6 +265,9 @@ class UartConnect():
 
             # 发送测试命令
             try:
+                # 如果串口有数据，则直接返回True, 避免设备索取天气信息导致串口堵塞
+                if self.ser.in_waiting:
+                    return True
                 self.ser.write('#001$'.encode())
                 print(f'send command:#001$')
                 time.sleep(1)  # 等待响应
@@ -258,8 +275,13 @@ class UartConnect():
                     response = self.ser.readline().decode().strip()
                     if response:
                         self.connected = True
+                        print(f'connect success and response:{response}')
+                        if self.first_connect_flag:
+                            # 每次重新连接时，更新天气数据
+                            self.wire_update_weather()
                         return True
             except:
+                print(f'connect failed')
                 return False
                 
             # 未收到正确响应，断开连接
@@ -301,10 +323,11 @@ class UartConnect():
             self.uarthread.stop()
         try:
             self.ser.write(command.encode())
-            time.sleep(0.8)  # 等待响应
+            time.sleep(1)  # 等待响应
             
             if self.ser.in_waiting:
                 response = self.ser.readline().decode().strip()
+                print(f'send_command response:{response}')
                 if response:
                     self.connected = True
                     return 1
@@ -352,7 +375,7 @@ class UartConnect():
         flag = 0
         update_count = 0
         # 读取现有配置
-        config_dict = {'user_name':None, 'area_city':None, 'power_show':None, 'encoder':None, 'color':None, 'power_save_start':None, 'power_save_end':None, 'power_deep_save':None, 'finger_pin':None, 'x_mode':None, 'x_input':None, 'update':None, 'connect':None}
+        config_dict = {'user_name':None, 'area_city':None, 'power_show':None, 'encoder':None, 'color':None, 'power_save_start':None, 'power_save_end':None, 'power_deep_save':None, 'power_night':None, 'finger_pin':None, 'x_mode':None, 'x_input':None, 'update':None, 'connect':None}
         if os.path.exists(self.config_file):
             with open(self.config_file, 'r', encoding='utf-8') as f:
                 for line in f:
@@ -366,90 +389,100 @@ class UartConnect():
             print(f'user name:{comand},flag:{flag}')
             update_count += 1
         # area city
-        area_city = ['深圳', '东莞', '广州', '惠州', '中山']
-        area_city_en = ['Shen Zhen', 'Dong Guan', 'Guang Zhou', 'Hui Zhou', 'Zhong Shan']
-        area_city_en_list = ['shenzhen', 'dongguan', 'guangzhou', 'huizhou', 'zhongshan']
-        if config_data['area_city'] != config_dict['area_city']:
-            index = area_city.index(config_data['area_city'])
-            self.weather = weather.WeatherAPI(area_city_en_list[index])
-            comand = '#041' + area_city_en[index] + '$'
-            flag += self.send_command(comand)
-            print(f'area city:{comand},flag:{flag}')
-            update_count += 1
-        # power show
-        if config_data['power_show'] != config_dict['power_show']:
-            comand = '#042' + str(config_data['power_show']) + '$'
-            flag += self.send_command(comand)
-            print(f'power show:{comand},flag:{flag}')
-            update_count += 1   
-        # encoder
-        if config_data['encoder'] != config_dict['encoder']:
-            comand = '#043' + str(config_data['encoder']) + '$'
-            flag += self.send_command(comand)
-            print(f'encoder:{comand},flag:{flag}')
-            update_count += 1
-        # color
-        if config_data['color'] != config_dict['color']:
-            comand = '#044' + str(config_data['color']) + '$'
-            flag += self.send_command(comand)
-            print(f'color:{comand},flag:{flag}')
-            update_count += 1
-        # power save start
-        if config_data['power_save_start'] != config_dict['power_save_start']:
-            comand = '#045' + str(config_data['power_save_start']) + '$'
-            flag += self.send_command(comand)
-            print(f'power save start:{comand},flag:{flag}')
-            update_count += 1
-        # power save end
-        if config_data['power_save_end'] != config_dict['power_save_end']:
-            comand = '#046' + str(config_data['power_save_end']) + '$'
-            flag += self.send_command(comand)
-            print(f'power save end:{comand},flag:{flag}')
-            update_count += 1
-        # power deep save
-        if config_data['power_deep_save'] != config_dict['power_deep_save']:
-            comand = '#047' + str(config_data['power_deep_save']) + '$'
-            flag += self.send_command(comand)
-            print(f'power deep save:{comand},flag:{flag}')
-            update_count += 1
-        # finger pin
-        if config_data['finger_pin'] != config_dict['finger_pin']:
-            comand = '#048' + str(config_data['finger_pin']) + '$'
-            flag += self.send_command(comand)
-            print(f'finger pin:{comand},flag:{flag}')
-            update_count += 1
-        # x mode
-        if config_data['x_mode'] != config_dict['x_mode']:
-            comand = '#049' + str(config_data['x_mode']) + '$'
-            flag += self.send_command(comand)
-            print(f'x mode:{comand},flag:{flag}')
-            update_count += 1
-        # x input
-        if config_data['x_input'] != config_dict['x_input']:
-            comand = '#04a' + str(config_data['x_input']) + '$'
-            flag += self.send_command(comand)
-            print(f'x input:{comand},flag:{flag}')
-            update_count += 1
-        # update flag
-        if config_data['update'] != config_dict['update']:
-            comand = '#04b' + str(config_data['update']) + '$'
-            flag += self.send_command(comand)
-            print(f'update flag:{comand},flag:{flag}')
-            update_count += 1
-        # connect flag
-        if config_data['connect'] != config_dict['connect']:
-            comand = '#04c' + str(config_data['connect']) + '$'
-            flag += self.send_command(comand)
-            print(f'connect flag:{comand},flag:{flag}')
-            update_count += 1
-        # ble connect
-        if connect_flag == '2':
-            command = '#070$'
-            response = self.get_ble_address(command)
-            if 'BLE Address' in response:
-                address = response.split('BLE Address:')[1].strip()
-                print(f'ble address:{address}')
-                self.add_ble_address(address)
+        area_city = ['深圳', '东莞', '广州', '惠州', '中山', '西安', '杭州']
+        area_city_en = ['Shen Zhen', 'Dong Guan', 'Guang Zhou', 'Hui Zhou', 'Zhong Shan', 'Xi An', 'Hang Zhou']
+        area_city_en_list = ['shenzhen', 'dongguan', 'guangzhou', 'huizhou', 'zhongshan', 'xian', 'hangzhou']
+        try:
+            if config_data['area_city'] != config_dict['area_city']:
+                index = area_city.index(config_data['area_city'])
+                self.weather = weather.WeatherAPI(area_city_en_list[index])
+                comand = '#041' + area_city_en[index] + '$'
+                flag += self.send_command(comand)
+                print(f'area city:{comand},flag:{flag}')
+                update_count += 1
+            # power show
+            if config_data['power_show'] != config_dict['power_show']:
+                comand = '#042' + str(config_data['power_show']) + '$'
+                flag += self.send_command(comand)
+                print(f'power show:{comand},flag:{flag}')
+                update_count += 1   
+            # encoder
+            if config_data['encoder'] != config_dict['encoder']:
+                comand = '#043' + str(config_data['encoder']) + '$'
+                flag += self.send_command(comand)
+                print(f'encoder:{comand},flag:{flag}')
+                update_count += 1
+            # color
+            if config_data['color'] != config_dict['color']:
+                comand = '#044' + str(config_data['color']) + '$'
+                flag += self.send_command(comand)
+                print(f'color:{comand},flag:{flag}')
+                update_count += 1
+            # power save start
+            if config_data['power_save_start'] != config_dict['power_save_start']:
+                comand = '#045' + str(config_data['power_save_start']) + '$'
+                flag += self.send_command(comand)
+                print(f'power save start:{comand},flag:{flag}')
+                update_count += 1
+            # power save end
+            if config_data['power_save_end'] != config_dict['power_save_end']:
+                comand = '#046' + str(config_data['power_save_end']) + '$'
+                flag += self.send_command(comand)
+                print(f'power save end:{comand},flag:{flag}')
+                update_count += 1
+            # power deep save
+            if config_data['power_deep_save'] != config_dict['power_deep_save']:
+                comand = '#047' + str(config_data['power_deep_save']) + '$'
+                flag += self.send_command(comand)
+                print(f'power deep save:{comand},flag:{flag}')
+                update_count += 1
+            # power night
+            if config_data['power_night'] != config_dict['power_night']:
+                comand = '#04f' + str(config_data['power_night']) + '$'
+                flag += self.send_command(comand)
+                print(f'power night:{comand},flag:{flag}')
+                update_count += 1
+            # finger pin
+            if config_data['finger_pin'] != config_dict['finger_pin']:
+                comand = '#048' + str(config_data['finger_pin']) + '$'
+                flag += self.send_command(comand)
+                print(f'finger pin:{comand},flag:{flag}')
+                update_count += 1
+            # x mode
+            if config_data['x_mode'] != config_dict['x_mode']:
+                comand = '#049' + str(config_data['x_mode']) + '$'
+                flag += self.send_command(comand)
+                print(f'x mode:{comand},flag:{flag}')
+                update_count += 1
+            # x input
+            if config_data['x_input'] != config_dict['x_input']:
+                comand = '#04a' + str(config_data['x_input']) + '$'
+                flag += self.send_command(comand)
+                print(f'x input:{comand},flag:{flag}')
+                update_count += 1
+            # update flag
+            if config_data['update'] != config_dict['update']:
+                comand = '#04b' + str(config_data['update']) + '$'
+                flag += self.send_command(comand)
+                print(f'update flag:{comand},flag:{flag}')
+                update_count += 1
+            # connect flag
+            if config_data['connect'] != config_dict['connect']:
+                comand = '#04c' + str(config_data['connect']) + '$'
+                flag += self.send_command(comand)
+                print(f'connect flag:{comand},flag:{flag}')
+                update_count += 1
+            # ble connect
+            if connect_flag == '2':
+                command = '#070$'
+                response = self.get_ble_address(command)
+                if 'BLE Address' in response:
+                    address = response.split('BLE Address:')[1].strip()
+                    print(f'ble address:{address}')
+                    self.add_ble_address(address)
+        except Exception as e:
+            print(f'updateConfig failed:{e}')
+            return 0
 
         print(f'uart updateConfig flag:{flag}, update_count:{update_count}')
         if flag >= update_count-1:
@@ -480,7 +513,8 @@ class UartConnect():
                     return 1
                 else:
                     return 0
-        except:
+        except Exception as e:
+            print(f'wire_update_weather failed:{e}')
             self.try_connect()
             return -1
 

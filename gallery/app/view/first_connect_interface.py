@@ -50,13 +50,13 @@ class FirstConnectCard(GroupHeaderCardWidget):
         print(f'-------flag_connect:{flag_connect}')
         if flag_connect:
             InfoBar.success(
-            title='已连接',
-            content="开始配置你的EK3吧！",
-            orient=Qt.Horizontal,
-            isClosable=False,
-            position=InfoBarPosition.TOP,
-            duration=2500,
-            parent=self
+                title='已连接',
+                content="开始配置你的EK3吧！",
+                orient=Qt.Horizontal,
+                isClosable=False,
+                position=InfoBarPosition.TOP,
+                duration=2500,
+                parent=self
             )
             self.button.setText('已连接')
             self.button.setEnabled(False)

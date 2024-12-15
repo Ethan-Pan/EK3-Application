@@ -219,7 +219,7 @@ class SettingInterface(ScrollArea):
     def check_update(self):
         latest_version = self.ota.check_version('EK-Home-release')
         print(f'latest_version:{latest_version}')
-        if latest_version != VERSION:
+        if float(latest_version) > float(VERSION):
             self._show_update_dialog(latest_version)
         else:
             self._show_no_update_dialog()
@@ -249,7 +249,7 @@ class SettingInterface(ScrollArea):
 
     def auto_check_update(self):
         latest_version = self.ota.check_version('EK-Home-release')
-        if latest_version != VERSION:
+        if float(latest_version) > float(VERSION):
             title = '检测到EK Home新版本'
             content = "找到新版本EK-Home-release-" + latest_version + "，确定下载吗？"
             w = Dialog(title, content, self)
