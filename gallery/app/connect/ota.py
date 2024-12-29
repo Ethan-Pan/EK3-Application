@@ -136,6 +136,7 @@ class Ota:
 # 使用示例
 if __name__ == '__main__':
     ota = Ota()
-    ota.check_version('EK3-firmware')
-    ota.downLoad()
+    # ota.check_version('EK3-firmware')
+    # ota.downLoad()
+    ota.latest_version = '1.2'
     ota.flash_firmware('COM3')

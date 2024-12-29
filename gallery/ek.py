@@ -2,7 +2,7 @@
 import os
 import sys
 
-from PySide6.QtCore import Qt, QTranslator
+from PySide6.QtCore import Qt, QTranslator, QSharedMemory
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QApplication
 from qfluentwidgets import FluentTranslator
@@ -10,6 +10,21 @@ from qfluentwidgets import FluentTranslator
 from app.common.config import cfg
 from app.view.main_window import MainWindow
 
+
+class SingleApplication(QApplication):
+    def __init__(self, argv):
+        super().__init__(argv)
+        
+        self.shared_memory = QSharedMemory('ekhomeflag')  # 替换成你的应用唯一标识
+        
+        if self.shared_memory.attach():
+            # 已经有一个实例在运行
+            self.shared_memory.detach()
+            sys.exit(1)
+        
+        # 创建共享内存
+        if not self.shared_memory.create(1):
+            sys.exit(1)
 
 # 启用 DPI 缩放
 if cfg.get(cfg.dpiScale) != "Auto":
@@ -19,7 +34,8 @@ if cfg.get(cfg.dpiScale) != "Auto":
     os.environ["QT_SCALE_FACTOR"] = str(cfg.get(cfg.dpiScale))
 
 # 创建 QApplication 实例
-app = QApplication(sys.argv)
+# app = QApplication(sys.argv)
+app = SingleApplication(sys.argv)
 # 设置属性,不为原生小部件创建兄弟小部件
 app.setAttribute(Qt.AA_DontCreateNativeWidgetSiblings)
 

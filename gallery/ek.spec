@@ -5,7 +5,7 @@ a = Analysis(
     ['ek.py'],
     pathex=[],
     binaries=[],
-    datas=[('C:/ProgramData/Anaconda3/envs/ek3/Lib/site-packages/esptool/targets/stub_flasher', 'esptool/targets/stub_flasher')],
+    datas=[('D:\\Users\\12609\\anaconda3\\envs\\ek3\\lib\\site-packages\\esptool\\targets/stub_flasher', 'esptool/targets/stub_flasher')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -32,7 +32,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['D:\\Users\\Desktop\\ek.ico'],
+    icon=['C:\\Users\\12609\\Desktop\\ek.ico'],
 )
 coll = COLLECT(
     exe,

@@ -58,7 +58,7 @@ class EKInterface(ScrollArea):
         self.conectCard.nav.bleSwitchButton.checkedChanged.connect(self.bleSwitchState)
         self.conectCard.nav.wireSwitchButton.checkedChanged.connect(self.wireSwitchState)
         self.conectCard.nav.bleSwitchButton.setEnabled(False)
-
+        
         self.config_connect_flag = '0'
         self.config_info = {}
 

@@ -53,7 +53,7 @@ missing module named asyncio.timeout - imported by asyncio (conditional), bleak 
 missing module named asyncio.DefaultEventLoopPolicy - imported by asyncio (delayed, conditional), asyncio.events (delayed, conditional)
 missing module named trove_classifiers - imported by setuptools.config._validate_pyproject.formats (optional)
 missing module named tomllib - imported by setuptools.compat.py310 (conditional)
-missing module named pyimod02_importers - imported by C:\ProgramData\Anaconda3\envs\ek3\Lib\site-packages\PyInstaller\hooks\rthooks\pyi_rth_pkgutil.py (delayed), C:\ProgramData\Anaconda3\envs\ek3\Lib\site-packages\PyInstaller\hooks\rthooks\pyi_rth_pkgres.py (delayed)
+missing module named pyimod02_importers - imported by D:\Users\12609\anaconda3\envs\ek3\Lib\site-packages\PyInstaller\hooks\rthooks\pyi_rth_pkgutil.py (delayed), D:\Users\12609\anaconda3\envs\ek3\Lib\site-packages\PyInstaller\hooks\rthooks\pyi_rth_pkgres.py (delayed)
 missing module named 'Xlib.XK' - imported by pyautogui._pyautogui_x11 (top-level)
 missing module named 'Xlib.ext' - imported by pyautogui._pyautogui_x11 (top-level)
 missing module named Xlib - imported by mouseinfo (conditional), pyautogui._pyautogui_x11 (top-level)
